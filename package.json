@@ -14,21 +14,22 @@
   "author": "Eliuth Bompart || github.com/eliuttth-dev || eliuttth@gmail.com",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^9.18.0",
+    "@eslint/js": "9.18.0",
     "@types/cors": "2.8.17",
     "@types/dotenv": "8.2.3",
     "@types/express": "5.0.0",
-    "eslint": "^9.18.0",
-    "globals": "^15.14.0",
-    "nodemon": "^3.1.9",
-    "prettier": "^3.4.2",
-    "ts-node": "^10.9.2",
+    "eslint": "9.18.0",
+    "globals": "15.14.0",
+    "nodemon": "3.1.9",
+    "prettier": "3.4.2",
+    "ts-node": "10.9.2",
     "typescript": "5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "8.20.0"
   },
   "dependencies": {
     "cors": "2.8.5",
     "dotenv": "16.4.7",
-    "express": "4.21.2"
+    "express": "4.21.2",
+    "mysql2": "3.12.0"
   }
 }
