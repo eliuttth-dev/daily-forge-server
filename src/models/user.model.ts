@@ -1,18 +1,6 @@
 import { RowDataPacket, ResultSetHeader, FieldPacket } from "mysql2/promise";
 import pool from "../config/dbConfig";
-
-interface UserData {
-  username: string;
-  email: string;
-  password?: string;
-}
-
-interface UserCreationResponse {
-  isSuccess: boolean;
-  status: string;
-  message: string;
-  data?: UserData;
-}
+import { UserData, UserCreationResponse } from "../interfaces";
 
 export const createNewUser = async (data: UserData): Promise<UserCreationResponse> => {
   const { username, email, password } = data;
