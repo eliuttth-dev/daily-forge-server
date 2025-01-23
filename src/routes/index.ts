@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import pool from "../config/dbConfig";
 import { registerHandler } from "../handlers/auth.handler";
+import { registerMiddleware } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
@@ -15,5 +16,5 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
 });
 
 // Auth Routes
-router.post("/api/v1/register", registerHandler);
+router.post("/api/v1/register", registerMiddleware, registerHandler);
 export default router;
