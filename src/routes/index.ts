@@ -1,20 +1,11 @@
-import express, { Request, Response } from "express";
-import pool from "../config/dbConfig";
+import express from "express";
+import { registerLimiter } from "../utils/rateLimiter";
 import { registerHandler } from "../handlers/auth.handler";
-import { registerMiddleware } from "../middlewares/auth.middleware";
+import { registerMiddleware, validateRegistration } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const [rows] = await pool.query("SELECT * FROM users");
-    res.json(rows);
-  } catch (err: any) {
-    console.error("Database query failed", err.message);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
 // Auth Routes
-router.post("/api/v1/register", registerMiddleware, registerHandler);
+router.post("/api/v1/register", validateRegistration, registerLimiter, registerMiddleware, registerHandler);
+
 export default router;
