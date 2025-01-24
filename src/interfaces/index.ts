@@ -3,6 +3,7 @@ export interface UserData {
   username: string;
   email: string;
   password?: string;
+  token?: unknown;
 }
 
 export interface UserCreationResponse {
