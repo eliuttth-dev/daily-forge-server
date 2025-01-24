@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
+const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
 
 const dbConfig = {
   host: !DB_HOST ? "localhost" : DB_HOST,
@@ -11,6 +11,7 @@ const dbConfig = {
   password: !DB_PASSWORD ? "password" : DB_PASSWORD,
   database: !DB_NAME ? "database name" : DB_NAME,
   waitForConnections: true,
+  port: DB_PORT ? parseInt(DB_PORT) : 3306,
   connectionLimit: 10,
   maxIdle: 10,
   idleTimeout: 60000,
