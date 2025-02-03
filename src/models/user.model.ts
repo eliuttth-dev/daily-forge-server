@@ -1,4 +1,4 @@
-import { RowDataPacket, ResultSetHeader, FieldPacket } from "mysql2/promise";
+import { RowDataPacket } from "mysql2/promise";
 import pool from "../config/dbConfig";
 import { UserData, UserCreationResponse } from "../interfaces";
 
@@ -17,9 +17,8 @@ export const createNewUser = async (data: UserData): Promise<UserCreationRespons
     // create new user
     const query = "INSERT INTO users(username, email, password) VALUES (?, ?, ?)";
     const values = [username, email, password];
-    const [rows]: [ResultSetHeader, FieldPacket[]] = await pool.execute(query, values);
 
-    console.log(rows.insertId);
+    await pool.execute(query, values);
 
     return { isSuccess: true, status: "created", message: "User created successfully", data: { username, email } };
   } catch (err: unknown) {
