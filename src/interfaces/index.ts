@@ -1,7 +1,24 @@
+interface ScheduleData {
+  type: string;
+  timesPerDay: number;
+}
+
 export interface UserData {
   username: string;
   email: string;
   password?: string;
+}
+
+export interface HabitData {
+  ID: string;
+  userID: string;
+  name: string;
+  description?: string;
+  schedule?: ScheduleData;
+  category: string;
+  reminders?: string[];
+  streakTracking: boolean;
+  autoComplete: boolean;
 }
 
 export interface UserCreationResponse {
@@ -11,3 +28,9 @@ export interface UserCreationResponse {
   data?: UserData;
 }
 
+export interface HabitCreationResponse {
+  isSuccess: boolean;
+  status: string;
+  message: string;
+  habit?: HabitData;
+}
