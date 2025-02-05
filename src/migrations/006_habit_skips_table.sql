@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS habit_skips(
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  habit_id UUID NOT NULL,
-  user_id UUID NOT NULL,
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  habit_id INT NOT NULL,
+  user_id INT NOT NULL,
   skip_date DATE NOT NULL,
   skip_reason TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

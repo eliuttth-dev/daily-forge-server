@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS habit_completions(
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  habit_id UUID NOT NULL,
-  user_id UUID NOT NULL,
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  habit_id INT NOT NULL,
+  user_id INT NOT NULL,
   completion_time TIMESTAMP NOT NULL,
   progress INT DEFAULT 1,
   notes TEXT,

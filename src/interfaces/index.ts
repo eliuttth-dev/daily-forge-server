@@ -10,7 +10,7 @@ export interface UserData {
 }
 
 export interface HabitData {
-  ID: string;
+  ID?: number;
   userID: string;
   name: string;
   description?: string;

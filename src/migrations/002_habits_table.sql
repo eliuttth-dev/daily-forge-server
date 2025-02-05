@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS habits (
-  id UUID PRIMARY KEY DEFAULT get_random_uuid(),
-  user_id UUID NOT NULL,
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
   name VARCHAR(255) NOT NULL,
   description TEXT,
   category VARCHAR(100) NOT NULL,
