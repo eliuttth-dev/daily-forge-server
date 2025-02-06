@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator";
 import { logger } from "../logger";
+import { sendErrorResponse } from "../utils/responseHandler";
 import jwt from "jsonwebtoken";
 
 const { JWT_SECRET } = process.env;
@@ -39,8 +40,7 @@ export const registerMiddleware = async (req: Request, res: Response, next: Next
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       logger.warn("Registration attempt with invalid data", { errors: errors.array() });
-      res.status(400).json({ errors: errors.array() });
-      return;
+      sendErrorResponse(res, 400, "Invalid registration data", errors.array());
     }
 
     const { username, email } = req.body;
@@ -54,7 +54,7 @@ export const registerMiddleware = async (req: Request, res: Response, next: Next
       errorMessage = err.message;
       logger.error("Error in registration middleware", { error: errorMessage });
     }
-    res.status(500).json({ message: "Internal server error", error: errorMessaage });
+    sendErrorResponse(res, 500, "Internal Server Error");
     return;
   }
 };
@@ -78,8 +78,7 @@ export const loginMiddleware = (req: Request, res: Response, next: NextFunction)
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     logger.warn("Login attempt with invalid data", { errors: errors.array() });
-    res.status(400).json({ errors: errors.array() });
-    return;
+    sendErrorResponse(res, 400, "Invalid login data", errors.array());
   }
 
   next();
@@ -98,8 +97,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     logger.warn("Access denied: No token provided or token format is invalid!");
-    res.status(401).json({ message: "Access denied: No token provided or token format is invalid" });
-    return;
+    sendErrorResponse(res, 401, "Access denied: No token provided or token format is invalid");
   }
 
   const token = authHeader.split(" ")[1];
@@ -108,18 +106,15 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     if (err) {
       if (err.name === "TokenExpiredError") {
         logger.warn("Access denied: Expired token");
-        res.status(403).json({ message: "Access denied: Expired Token" });
-        return;
+        sendErrorResponse(res, 403, "Access denied: Expired Token");
       }
       if (err.name === "JsonWebTokenError") {
         logger.warn("Access denied: Malformed or Invalid token");
-        res.status(403).json({ message: "Access denied: Invalid token" });
-        return;
+        sendErrorResponse(res, 403, "Access denied: Invalid Token");
       }
 
       logger.warn("Access denied: Authentication failed", { error: err.message });
-      res.status(403).join({ message: "Access denied: Authentication failed" });
-      return;
+      sendErrorResponse(res, 403, "Access denied: Authentication failed");
     }
 
     (req as any).user = decoded;

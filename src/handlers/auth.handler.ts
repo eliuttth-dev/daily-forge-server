@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createNewUser, logUser } from "../models/user.model";
 import { logger } from "../logger";
+import { sendErrorResponse, sendSuccessResponse } from "../utils/responseHandler";
 import jwt from "jsonwebtoken";
 
 /**
@@ -19,20 +20,20 @@ export const registerHandler = async (req: Request, res: Response): Promise<void
 
     if (userData.isSuccess) {
       logger.info("User registered successfully");
-      res.status(201).json({ message: "User registered successfully", data: userData });
-      return;
+      sendSuccessResponse(res, { message: "User registered successfully", data: userData });
     }
 
     logger.warn("Registration conflict", { message: userData.message });
-    res.status(409).json({ message: userData.message });
+
+    sendErrorResponse(res, 409, userData.message);
   } catch (err: unknown) {
     let errorMessage = "Internal Server Error";
     if (err instanceof Error) {
       errorMessage = err.message;
       logger.error("Error during registration", { error: errorMessage });
     }
-    res.status(500).json({ message: "Internal Server Error", error: errorMessage });
-    return;
+    logger.error("Unexpected error during registration", { error: errorMessage });
+    sendErrorResponse(res, 500, "Internal Server Error");
   }
 };
 
@@ -59,13 +60,11 @@ export const loginHandler = async (req: Request, res: Response): Promise<void> =
     if (!loginResult.isSuccess) {
       logger.warn("Loggin attempt failed", { status: loginResult.status });
       if (loginResult.status === "not_found") {
-        res.status(404).json({ message: loginResult.message });
-        return;
+        sendErrorResponse(res, 404, loginResult.message);
       } else if (loginResult.status === "unauthorized") {
-        res.status(401).json({ message: loginResult.message });
-        return;
+        sendErrorResponse(res, 401, loginResult.message);
       } else {
-        res.status(400).json({ message: loginResult.message });
+        sendErrorResponse(res, 400, loginResult.message);
       }
       return;
     }
@@ -79,7 +78,7 @@ export const loginHandler = async (req: Request, res: Response): Promise<void> =
     logger.info("User logged in successfully", { username: loginResult.data?.username });
 
     res.header("Authorization", `Bearer ${token}`);
-    res.status(200).json({
+    sendSuccessResponse(res, {
       message: loginResult.message,
       token,
       data: loginResult.data,
@@ -90,7 +89,6 @@ export const loginHandler = async (req: Request, res: Response): Promise<void> =
       errorMessage = err.message;
       logger.error("Error during login", { error: err.message });
     }
-    res.status(500).json({ message: "Internal Server Error", error: errorMessage });
-    return;
+    sendErrorResponse(res, 500, "Internal Server Error");
   }
 };

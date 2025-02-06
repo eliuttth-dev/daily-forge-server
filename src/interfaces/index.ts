@@ -50,3 +50,15 @@ export interface UserLoginResponse {
     token?: string;
   };
 }
+
+export interface ErrorResponse {
+  status: "error";
+  error: { message: string };
+  data: null;
+}
+
+export interface SuccessResponse {
+  status: "success";
+  data?: unknown;
+  error: null;
+}

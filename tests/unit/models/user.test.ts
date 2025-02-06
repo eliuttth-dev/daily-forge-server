@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 jest.mock("bcrypt", () => ({
   compare: jest.fn(),
   hash: jest.fn().mockResolvedValue("hashedPassword"),
+  genSalt: jest.fn().mockResolvedValue("mockSalt"),
 }));
 
 jest.mock("../../../src/config/dbConfig", () => {

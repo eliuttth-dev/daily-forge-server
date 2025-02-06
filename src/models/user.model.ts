@@ -3,6 +3,7 @@ import pool from "../config/dbConfig";
 import { UserData, UserLoginData, UserCreationResponse, UserLoginResponse } from "../interfaces";
 import { logger } from "../logger";
 import bcrypt from "bcrypt";
+import { getCachedSalt } from "../utils/saltCache";
 
 interface UserRow extends RowDataPacket {
   username: string;
@@ -54,7 +55,8 @@ export const createNewUser = async (data: UserData): Promise<UserCreationRespons
 
     // Hash password
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password!, saltRounds);
+    const cachedSalt = await getCachedSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, cachedSalt);
 
     // Insert new user
     const insertQuery = "INSERT INTO users(username, email, password) VALUES (?, ?, ?)";
