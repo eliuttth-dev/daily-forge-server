@@ -1,0 +1,21 @@
+// REGISTER USER
+curl -X POST http://localhost:3000/api/v1/register \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "testuser",
+        "email": "test@example.com",
+        "password": "Passw0rd!"
+      }'
+
+// LOG USER
+curl -X POST http://localhost:3000/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{
+        "identifier": "testuser",
+        "password": "Passw0rd!"
+      }'
+
+// TEST TOKEN
+curl -X GET http://localhost:3000/api/v1/testToken \
+  -H "Authorization: Bearer <your_token_here>"
+
