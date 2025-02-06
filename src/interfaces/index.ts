@@ -34,3 +34,19 @@ export interface HabitCreationResponse {
   message: string;
   habit?: HabitData;
 }
+
+export interface UserLoginData {
+  identifier: string; // username or email
+  password: string;
+}
+
+export interface UserLoginResponse {
+  isSuccess: boolean;
+  status: string;
+  message: string;
+  data?: {
+    username: string;
+    email: string;
+    token?: string;
+  };
+}
