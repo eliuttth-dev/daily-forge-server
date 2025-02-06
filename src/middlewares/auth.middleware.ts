@@ -40,7 +40,8 @@ export const registerMiddleware = async (req: Request, res: Response, next: Next
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       logger.warn("Registration attempt with invalid data", { errors: errors.array() });
-      sendErrorResponse(res, 400, "Invalid registration data", errors.array());
+      sendErrorResponse(res, 400, "Invalid registration data");
+      return;
     }
 
     const { username, email } = req.body;
@@ -78,7 +79,8 @@ export const loginMiddleware = (req: Request, res: Response, next: NextFunction)
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     logger.warn("Login attempt with invalid data", { errors: errors.array() });
-    sendErrorResponse(res, 400, "Invalid login data", errors.array());
+    sendErrorResponse(res, 400, "Invalid login data");
+    return;
   }
 
   next();
@@ -98,23 +100,27 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     logger.warn("Access denied: No token provided or token format is invalid!");
     sendErrorResponse(res, 401, "Access denied: No token provided or token format is invalid");
+    return;
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = authHeader!.split(" ")[1];
 
   jwt.verify(token, JWT_SECRET!, (err, decoded) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
         logger.warn("Access denied: Expired token");
         sendErrorResponse(res, 403, "Access denied: Expired Token");
+        return;
       }
       if (err.name === "JsonWebTokenError") {
         logger.warn("Access denied: Malformed or Invalid token");
         sendErrorResponse(res, 403, "Access denied: Invalid Token");
+        return;
       }
 
       logger.warn("Access denied: Authentication failed", { error: err.message });
       sendErrorResponse(res, 403, "Access denied: Authentication failed");
+      return;
     }
 
     (req as any).user = decoded;

@@ -21,11 +21,13 @@ export const registerHandler = async (req: Request, res: Response): Promise<void
     if (userData.isSuccess) {
       logger.info("User registered successfully");
       sendSuccessResponse(res, { message: "User registered successfully", data: userData });
+      return;
     }
 
     logger.warn("Registration conflict", { message: userData.message });
 
     sendErrorResponse(res, 409, userData.message);
+    return;
   } catch (err: unknown) {
     let errorMessage = "Internal Server Error";
     if (err instanceof Error) {
@@ -34,6 +36,7 @@ export const registerHandler = async (req: Request, res: Response): Promise<void
     }
     logger.error("Unexpected error during registration", { error: errorMessage });
     sendErrorResponse(res, 500, "Internal Server Error");
+    return;
   }
 };
 
@@ -61,10 +64,13 @@ export const loginHandler = async (req: Request, res: Response): Promise<void> =
       logger.warn("Loggin attempt failed", { status: loginResult.status });
       if (loginResult.status === "not_found") {
         sendErrorResponse(res, 404, loginResult.message);
+        return;
       } else if (loginResult.status === "unauthorized") {
         sendErrorResponse(res, 401, loginResult.message);
+        return;
       } else {
         sendErrorResponse(res, 400, loginResult.message);
+        return;
       }
       return;
     }
@@ -83,12 +89,14 @@ export const loginHandler = async (req: Request, res: Response): Promise<void> =
       token,
       data: loginResult.data,
     });
+    return;
   } catch (err: unknown) {
     let errorMessage = "Internal Server Error";
     if (err instanceof Error) {
       errorMessage = err.message;
-      logger.error("Error during login", { error: err.message });
+      logger.error("Error during login", { error: errorMessage });
     }
     sendErrorResponse(res, 500, "Internal Server Error");
+    return;
   }
 };
