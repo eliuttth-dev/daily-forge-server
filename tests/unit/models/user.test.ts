@@ -1,7 +1,13 @@
 import { RowDataPacket } from "mysql2/promise";
 import pool from "../../../src/config/dbConfig";
-import { createNewUser } from "../../../src/models/user.model";
-import { UserData, UserCreationResponse } from "../../../src/interfaces";
+import { createNewUser, logUser } from "../../../src/models/user.model";
+import { UserData, UserLoginData, UserCreationResponse, UserLoginResponse } from "../../../src/interfaces";
+import bcrypt from "bcrypt";
+
+jest.mock("bcrypt", () => ({
+  compare: jest.fn(),
+  hash: jest.fn().mockResolvedValue("hashedPassword"),
+}));
 
 jest.mock("../../../src/config/dbConfig", () => {
   const mockConnection = {
@@ -149,5 +155,92 @@ describe("CreateNewUser", () => {
     expect(result.isSuccess).toBe(false);
     expect(result.status).toBe("error");
     expect(result.message).toBe("Connection failure");
+  });
+});
+
+describe("User Log in", () => {
+  const validUserLoginData: UserLoginData = {
+    identifier: "testUser",
+    password: "Securepassword1234$",
+  };
+
+  const mockUserRow: RowDataPacket & { username: string; email: string; password: string } = {
+    username: "testUser",
+    email: "test@example.com",
+    password: "hashedPassword",
+    constructor: { name: "RowDataPacket" } as any,
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("Should return not_found if the user is not found", async () => {
+    const mockConnection = {
+      query: jest.fn().mockResolvedValue([[], undefined]),
+      release: jest.fn(),
+    };
+
+    (pool.getConnection as jest.Mock).mockResolvedValueOnce(mockConnection);
+
+    const result: UserLoginResponse = await logUser(validUserLoginData);
+
+    expect(result.isSuccess).toBe(false);
+    expect(result.status).toBe("not_found");
+    expect(result.message).toBe("User not found");
+    expect(mockConnection.release).toHaveBeenCalled();
+  });
+
+  it("Should return unauthorized if the password is incorrect", async () => {
+    const mockConnection = {
+      query: jest.fn().mockResolvedValue([[mockUserRow], undefined]),
+      release: jest.fn(),
+    };
+    (pool.getConnection as jest.Mock).mockResolvedValueOnce(mockConnection);
+    (bcrypt.compare as jest.Mock).mockResolvedValueOnce(false);
+
+    const result: UserLoginResponse = await logUser(validUserLoginData);
+
+    expect(result.isSuccess).toBe(false);
+    expect(result.status).toBe("unauthorized");
+    expect(result.message).toBe("Incorrect username or password");
+    expect(mockConnection.release).toHaveBeenCalled();
+  });
+
+  it("Should log in successfully if credentials are correct", async () => {
+    const mockConnection = {
+      query: jest.fn().mockResolvedValue([[mockUserRow], undefined]),
+      release: jest.fn(),
+    };
+
+    (pool.getConnection as jest.Mock).mockResolvedValueOnce(mockConnection);
+    (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+
+    const result: UserLoginResponse = await logUser(validUserLoginData);
+
+    expect(result.isSuccess).toBe(true);
+    expect(result.status).toBe("logged_in");
+    expect(result.message).toBe("User logged in successfully");
+    expect(result.data).toEqual({
+      username: mockUserRow.username,
+      email: mockUserRow.email,
+    });
+    expect(mockConnection.release).toHaveBeenCalled();
+  });
+
+  it("Should return an error if the query fails", async () => {
+    const queryError = new Error("Query failure");
+    const mockConnection = {
+      query: jest.fn().mockRejectedValue(queryError),
+      release: jest.fn(),
+    };
+    (pool.getConnection as jest.Mock).mockResolvedValueOnce(mockConnection);
+
+    const result: UserLoginResponse = await logUser(validUserLoginData);
+
+    expect(result.isSuccess).toBe(false);
+    expect(result.status).toBe("error");
+    expect(result.message).toBe("Query failure");
+    expect(mockConnection.release).toHaveBeenCalled();
   });
 });
