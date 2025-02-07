@@ -108,7 +108,7 @@ export const logUser = async (data: UserLoginData): Promise<UserLoginResponse> =
     connection = await pool.getConnection();
 
     // Retrieve user data using username or email
-    const selectQuery: string = "SELECT username, email, password FROM users WHERE username = ? OR email = ?";
+    const selectQuery: string = "SELECT id, username, email, password FROM users WHERE username = ? OR email = ?";
     const selectValues: string[] = [identifier, identifier];
     const [rows] = await connection.query<UserRow[]>(selectQuery, selectValues);
 
@@ -140,7 +140,7 @@ export const logUser = async (data: UserLoginData): Promise<UserLoginResponse> =
       isSuccess: true,
       status: "logged_in",
       message: "User logged in successfully",
-      data: { username: user.username, email: user.email },
+      data: { id: user.id, username: user.username, email: user.email },
     };
   } catch (err: unknown) {
     let errorMessage = "An unexpected error occurred";

@@ -1,9 +1,9 @@
 User Stories for Daily Habit Tracking
 
 Basic Habit Logging
-[X] - As a user, I want to create a new habit.
+[DONE] - As a user, I want to create a new habit.
 
-As a user, I want to tap on a habit to mark it as completed so that I can easily track my daily progress.
+[DONE] - As a user, I want to tap on a habit to mark it as completed so that I can easily track my daily progress.
 
 Undo Habit Logging
 As a user, I want to undo a habit entry in case I mark it by mistake so that my habit streak remains accurate.

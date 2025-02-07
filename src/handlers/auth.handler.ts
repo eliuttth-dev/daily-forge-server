@@ -76,6 +76,7 @@ export const loginHandler = async (req: Request, res: Response): Promise<void> =
     }
 
     const payload = {
+      id: loginResult.data?.id,
       username: loginResult.data?.username,
       email: loginResult.data?.email,
     };

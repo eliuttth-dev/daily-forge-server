@@ -45,6 +45,7 @@ export interface UserLoginResponse {
   status: string;
   message: string;
   data?: {
+    id: number;
     username: string;
     email: string;
     token?: string;
