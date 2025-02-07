@@ -1,5 +1,5 @@
 // REGISTER USER
-curl -X POST http://localhost:3000/api/v1/register \
+curl -X POST http://localhost:3030/api/v1/register \
   -H "Content-Type: application/json" \
   -d '{
         "username": "testuser",
@@ -8,14 +8,32 @@ curl -X POST http://localhost:3000/api/v1/register \
       }'
 
 // LOG USER
-curl -X POST http://localhost:3000/api/v1/login \
+curl -X POST http://localhost:3030/api/v1/login \
   -H "Content-Type: application/json" \
   -d '{
-        "identifier": "testuser",
-        "password": "Passw0rd!"
+        "identifier": "root",
+        "password": "Admin1234$"
       }'
 
-// TEST TOKEN
-curl -X GET http://localhost:3000/api/v1/testToken \
-  -H "Authorization: Bearer <your_token_here>"
+// CREATE HABIT
+curl -X POST http://localhost:3030/api/v1/habits   -H "Content-Type: application/json"   -H "Authorization: Bearer <your_jwt_token>"   -d '{
+    "userID": "9",
+    "name": "DEBUG",
+    "description": "Fix a bug",
+    "category": "Tech",
+    "schedule": { "type": "daily", "timesPerDay": 1 },
+    "reminders": ["06:30"],
+    "streakTracking": true,
+    "autoComplete": false
+  }'
+
+// MARK HABIT AS COMPLETE
+curl -X POST http://localhost:3030/api/v1/habits/6/complete \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your_jwt_token>" \
+  -d '{
+    "progress": 2, 
+    "completionTarget": 5,
+    "notes": "Felt great today!"
+  }'
 
