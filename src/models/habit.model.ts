@@ -1,15 +1,15 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import pool from "../config/dbConfig";
-import { HabitData, HabitCreationResponse } from "../interfaces";
+import { HabitData, HabitResponse } from "../interfaces";
 import { logger } from "../logger";
 
 /**
  * Creates a new habit and associates it with a user
  *
  * @param {HabitData} data - The habit data including user ID, name, category, schedule, reminders, etc
- * @returns {Promise<HabitCreationResponse>} - Result of the habit creation process.
+ * @returns {Promise<HabitResponse>} - Result of the habit creation process.
  */
-export const createNewHabit = async (data: HabitData): Promise<HabitCreationResponse> => {
+export const createNewHabit = async (data: HabitData): Promise<HabitResponse> => {
   const { userID, name, description, schedule, category, reminders, streakTracking, autoComplete } = data;
 
   // Validate required fields
@@ -125,7 +125,7 @@ export const createNewHabit = async (data: HabitData): Promise<HabitCreationResp
  * @param {string} userID - The ID of the user marking the habit as completed
  * @param {number} progress - The progress increment (default to 1)
  * @param {string} [notes] - Optional notes for this habit completion
- * @returns {Promise<HabitCreationResponse>} - Completation Response
+ * @returns {Promise<HabitResponse>} - Completation Response
  */
 export const markHabitAsCompleted = async (
   habitId: number,
@@ -133,7 +133,7 @@ export const markHabitAsCompleted = async (
   progressIncrement: number = 1,
   completionTarget: number,
   notes?: string,
-): Promise<HabitCreationResponse> => {
+): Promise<HabitResponse> => {
   let connection;
 
   try {
@@ -257,6 +257,81 @@ export const markHabitAsCompleted = async (
     if (connection) {
       connection.release();
       logger.info("Database connection released for markHabitAsCompleted");
+    }
+  }
+};
+
+/**
+ *  Undo a specific habit entry by removing the corresponding habit completion record
+ */
+export const undoHabitEntry = async (habitId: number, userID: string): Promise<HabitResponse> => {
+  let connection;
+
+  try {
+    connection = await pool.getConnection();
+    logger.info("Database connection acquired for undoing habit entry", { habitId, userID });
+
+    await connection.beginTransaction();
+    logger.info("Transaction started for undoing habit entry", { habitId, userID });
+
+    // Check if the completion entry exists for the selected habit
+    const selectQuery = `
+      SELECT id from habit_completions
+      WHERE habit_id = ? AND user_id = ?
+      ORDER BY completion_time DESC LIMIT 1;
+    `;
+    const selectValues = [habitId, userID];
+    const [rows] = await connection.query<RowDataPacket[]>(selectQuery, selectValues);
+
+    if (rows.length === 0) {
+      logger.warn("No habit entry found to undo", { habitId, userID });
+      return {
+        isSuccess: false,
+        status: "not_found",
+        message: "No habit entry found to undo",
+      };
+    }
+
+    const completionId = rows[0].id;
+
+    // Delete the selected habit entry
+    const deleteQuery = "DELETE FROM habit_completions WHERE id = ?";
+    const [result] = await connection.execute<ResultSetHeader>(deleteQuery, [completionId]);
+
+    if (result.affectedRows === 0) {
+      logger.error("Failed to delete selected habit entry", { habitId, userID });
+      throw new Error("Failed to undo habit entry");
+    }
+
+    await connection.commit();
+    logger.info("Selected habit entry undone successfully", { habitId, userID });
+
+    return {
+      isSuccess: true,
+      status: "undone",
+      message: "Selected habit entry undone successfully",
+    };
+  } catch (err: unknown) {
+    let errorMessage = "Internal Server Error";
+
+    if (err instanceof Error) errorMessage = err.message;
+
+    if (connection) {
+      await connection.rollback();
+      logger.warn("Transaction rolled back due to error in undoHabitEntry", { error: errorMessage });
+    }
+
+    logger.error("Error undoing selected habit entry", { error: errorMessage });
+
+    return {
+      isSuccess: false,
+      status: "error",
+      message: errorMessage,
+    };
+  } finally {
+    if (connection) {
+      connection.release();
+      logger.info("Database connection released for undoHabitEntry");
     }
   }
 };
