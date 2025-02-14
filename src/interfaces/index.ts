@@ -28,7 +28,7 @@ export interface UserCreationResponse {
   data?: UserData;
 }
 
-export interface HabitCreationResponse {
+export interface HabitResponse {
   isSuccess: boolean;
   status: string;
   message: string;

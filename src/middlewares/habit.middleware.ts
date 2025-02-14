@@ -117,3 +117,24 @@ export const markHabitAsCompleteMiddleware = async (req: Request, res: Response,
     return;
   }
 };
+
+/**
+ *  Middleware to validate undo habit completion request
+ */
+export const validateUndoHabitCompletion = [param("habitId").isInt({ min: 1 }).withMessage("Habit ID must be a positive integer")];
+
+/**
+ *  Middleware to handle validation results
+ */
+export const undoHabitCompletionMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    logger.warn("Invalid undo habit request", { errors: errors.array() });
+    sendErrorResponse(res, 400, "Invalid habit ID");
+    return;
+  }
+
+  logger.info("Undo habit request validated successfully", { habitId: req.params.habitId, userID: (req as any).user?.id });
+  next();
+};

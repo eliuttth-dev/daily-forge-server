@@ -6,7 +6,7 @@ Basic Habit Logging
 [DONE] - As a user, I want to tap on a habit to mark it as completed so that I can easily track my daily progress.
 
 Undo Habit Logging
-As a user, I want to undo a habit entry in case I mark it by mistake so that my habit streak remains accurate.
+[] - As a user, I want to undo a habit entry in case I mark it by mistake so that my habit streak remains accurate.
 
 Partial Completion
 As a user, I want to log partial progress for a habit (e.g., drank 1 out of 2 liters of water) so that I can track my progress throughout the day.
