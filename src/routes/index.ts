@@ -1,6 +1,6 @@
 import express from "express";
 import { registerHandler, loginHandler } from "../handlers/auth.handler";
-import { createHabitHandler, markHabitAsCompleteHandler } from "../handlers/habit.handler";
+import { createHabitHandler, markHabitAsCompleteHandler, undoHabitCompletionHandler } from "../handlers/habit.handler";
 import {
   validateRegistration,
   registerMiddleware,
@@ -8,7 +8,14 @@ import {
   loginMiddleware,
   authenticateToken,
 } from "../middlewares/auth.middleware";
-import { validateHabit, habitMiddleware, validateHabitCompletion, markHabitAsCompleteMiddleware } from "../middlewares/habit.middleware";
+import {
+  validateHabit,
+  habitMiddleware,
+  validateHabitCompletion,
+  markHabitAsCompleteMiddleware,
+  validateUndoHabitCompletion,
+  undoHabitCompletionMiddleware,
+} from "../middlewares/habit.middleware";
 import { registerLimiter, loginLimiter } from "../utils/rateLimiter";
 
 const router = express.Router();
@@ -25,5 +32,12 @@ router.post(
   validateHabitCompletion,
   markHabitAsCompleteMiddleware,
   markHabitAsCompleteHandler,
+);
+router.delete(
+  "/api/v1/habits/:habitId/undo",
+  authenticateToken,
+  validateUndoHabitCompletion,
+  undoHabitCompletionMiddleware,
+  undoHabitCompletionHandler,
 );
 export default router;

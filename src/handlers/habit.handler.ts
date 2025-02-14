@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createNewHabit, markHabitAsCompleted } from "../models/habit.model";
+import { createNewHabit, markHabitAsCompleted, undoHabitEntry } from "../models/habit.model";
 import { logger } from "../logger";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responseHandler";
 
@@ -91,6 +91,40 @@ export const markHabitAsCompleteHandler = async (req: Request, res: Response): P
     if (err instanceof Error) {
       errorMessage = err.message;
       logger.error("Unexpected error during habit completion", { error: errorMessage });
+    }
+    sendErrorResponse(res, 500, "Internal Server Error");
+    return;
+  }
+};
+
+/**
+ *  Handler to undo a specific habit completion entry
+ */
+export const undoHabitCompletionHandler = async (req: Request, res: Response): Promise<void> => {
+  const userID = (req as any).user?.id;
+  const habitId = parseInt(req.params.habitId, 10);
+
+  try {
+    if (!userID) throw new Error("userID is not defined");
+
+    logger.info("Undo habit request received", { habitId, userID });
+
+    const result = await undoHabitEntry(habitId, userID);
+
+    if (result.isSuccess) {
+      logger.info("Selected habit entry undone successfully", { habitId, userID });
+      sendSuccessResponse(res, { message: result.message });
+      return;
+    }
+
+    logger.warn("Undo habit entry failed", { habitId, userID, reason: result.message });
+    sendErrorResponse(res, 400, result.message);
+    return;
+  } catch (err: unknown) {
+    let errorMessage = "Internal Server Error";
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      logger.error("Unexpected error during habit undo", { error: errorMessage });
     }
     sendErrorResponse(res, 500, "Internal Server Error");
     return;

@@ -4,7 +4,7 @@ MAIN USER STORY: As a user, I want to undo a habit entry in case I mark it by mi
 
 SUB-TASKS:
 
-[] - Undo Endpoint for Habit Entry – Allow users to quickly undo a habit entry right after marking it.
+[DONE] - Undo Endpoint for Habit Entry – Allow users to quickly undo a habit entry.
 [] - Habit History Log – Maintain a log of all habit completions with timestamps, enabling users to revert changes.
 [] - Confirm Undo Prompt – Ask users for confirmation before undoing an entry to prevent accidental changes.
 [] - Streak Recalculation – Ensure that streaks are dynamically updated when a habit entry is undone.
