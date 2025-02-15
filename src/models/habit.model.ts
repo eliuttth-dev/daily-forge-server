@@ -192,6 +192,10 @@ export const markHabitAsCompleted = async (
       await connection.commit();
       logger.info("Habit completion updated successfully", { habitId, userID, newProgress, isCompleted, notes });
 
+      // Recalculate and update streak
+      const streak = await calculateStreak(habitId, userID);
+      await updateStreak(habitId, userID, streak);
+
       return {
         isSuccess: true,
         status: "updated",
@@ -224,6 +228,10 @@ export const markHabitAsCompleted = async (
 
     await connection.commit();
     logger.info("Transaction committed successfully for habit completion", { habitId, userID, newProgress, isCompleted, notes });
+
+    // Recalculate and update streak
+    const streak = await calculateStreak(habitId, userID);
+    await updateStreak(habitId, userID, streak);
 
     return {
       isSuccess: true,
@@ -306,6 +314,10 @@ export const undoHabitEntry = async (habitId: number, userID: string): Promise<H
     await connection.commit();
     logger.info("Selected habit entry undone successfully", { habitId, userID });
 
+    // Recalculate and update streak
+    const streak = await calculateStreak(habitId, userID);
+    await updateStreak(habitId, userID, streak);
+
     return {
       isSuccess: true,
       status: "undone",
@@ -332,6 +344,93 @@ export const undoHabitEntry = async (habitId: number, userID: string): Promise<H
     if (connection) {
       connection.release();
       logger.info("Database connection released for undoHabitEntry");
+    }
+  }
+};
+
+/**
+ *  Calculatesthe streak for a habit based on completion reords
+ *
+ *  @param {number} habitId - The ID of the habit
+ *  @param {string} userID - The ID of the user
+ *  @returns {Promise<number>} - The current streak count
+ */
+const calculateStreak = async (habitId: number, userID: string): Promise<number> => {
+  let connection;
+
+  try {
+    connection = await pool.getConnection();
+    logger.info("Database connection acquired for calculating streak", { habitId, userID });
+
+    const selectQuery = `
+      SELECT completion_time
+      FROM habit_completions
+      WHERE habit_id = ? AND user_id = ? AND is_completed = 1
+      ORDER BY completion_time DESC;`;
+    const selectValues = [habitId, userID];
+    const [rows] = await connection.query<RowDataPacket[]>(selectQuery, selectValues);
+
+    let streak = 0;
+    let previousDate: Date | null = null;
+
+    for (const row of rows) {
+      const currentDate = new Date(row.completion_time);
+      if (previousDate === null) {
+        streak = 1;
+      } else {
+        const diffTime = Math.abs(previousDate.getTime() - currentDate.getTime());
+        const diffDays = Math.cell(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      previousDate = currentDate;
+    }
+
+    logger.info("Streak calculated successfully", { habitId, userID, streak });
+    return streak;
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+    log.error("Error calculating streak", { error: errorMessage, habitId, userID });
+    throw new Error(errorMessage);
+  } finally {
+    if (connection) {
+      connection.release();
+      logger.info("Database connection released for calculating streak", { habitId, userID });
+    }
+  }
+};
+
+/**
+ *  Updates the streak for a habit in the database
+ *
+ *  @param {number} habitId - The ID of the habit
+ *  @param {string} userID - The ID of the user
+ *  @param {number} streak - The new streak value
+ */
+const updateStreak = async (habitId: number, userID: string, streak: number): Promise<void> => {
+  let connection;
+
+  try {
+    connection = await pool.getConnection();
+    logger.info("Database connection acquired for updating streak", { habitId, userID, streak });
+
+    const updateQuery = "UPDATE habits SET streak = ? WHERE id = ? AND user_id = ?";
+    const updateValues = [streak, habitId, userID];
+
+    await connection.execute(updateQuery, updateValues);
+    logger.info("Streak updated successfully", { habitId, userID, streak });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+    logger.error("Error updating streak", { error: errorMessage, habitId, userID, streak });
+    throw new Error(errorMessage);
+  } finally {
+    if (connection) {
+      connection.release();
+      logger.info("Database connection released for updating streak", { habitId, userID, streak });
     }
   }
 };
