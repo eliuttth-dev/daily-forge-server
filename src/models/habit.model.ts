@@ -379,7 +379,7 @@ const calculateStreak = async (habitId: number, userID: string): Promise<number>
         streak = 1;
       } else {
         const diffTime = Math.abs(previousDate.getTime() - currentDate.getTime());
-        const diffDays = Math.cell(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays === 1) {
           streak++;
@@ -394,7 +394,7 @@ const calculateStreak = async (habitId: number, userID: string): Promise<number>
     return streak;
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
-    log.error("Error calculating streak", { error: errorMessage, habitId, userID });
+    logger.error("Error calculating streak", { error: errorMessage, habitId, userID });
     throw new Error(errorMessage);
   } finally {
     if (connection) {
