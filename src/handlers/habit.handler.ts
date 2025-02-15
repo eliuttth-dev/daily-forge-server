@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { createNewHabit, markHabitAsCompleted, undoHabitEntry } from "../models/habit.model";
+import { logHabitAction } from "../models/habitHistory.model";
 import { logger } from "../logger";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responseHandler";
 
@@ -76,6 +77,11 @@ export const markHabitAsCompleteHandler = async (req: Request, res: Response): P
     logger.info("Habit completion request received", { userID, habitId, progress, completionTarget: target, notes });
 
     const completionResult = await markHabitAsCompleted(habitId, userID, progress, target, notes);
+    const logged = await logHabitAction(habitId, userID, "COMPLETED");
+
+    if (!logged) throw new Error("Failed to log habit completion");
+
+    logger.info("habit completed and logged successfully", { habitId, userID });
 
     if (completionResult.isSuccess) {
       logger.info("Habit marked as completed", { habitId, userID, status: completionResult.status });
@@ -110,6 +116,11 @@ export const undoHabitCompletionHandler = async (req: Request, res: Response): P
     logger.info("Undo habit request received", { habitId, userID });
 
     const result = await undoHabitEntry(habitId, userID);
+    const logged = await logHabitAction(habitId, userID, "UNDONE");
+
+    if (!logged) throw new Error("Failed to log habit undo");
+
+    logger.info("Habit undo successful and logged", { habitId, userID });
 
     if (result.isSuccess) {
       logger.info("Selected habit entry undone successfully", { habitId, userID });

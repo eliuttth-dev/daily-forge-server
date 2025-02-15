@@ -63,3 +63,11 @@ export interface SuccessResponse {
   data?: unknown;
   error: null;
 }
+
+export interface HabitHistory {
+  id?: number;
+  habitId: number;
+  userId: number;
+  action: "COMPLETED" | "UNDONE";
+  timestamp?: Date;
+}

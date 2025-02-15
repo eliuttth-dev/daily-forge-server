@@ -1,6 +1,7 @@
 import express from "express";
 import { registerHandler, loginHandler } from "../handlers/auth.handler";
 import { createHabitHandler, markHabitAsCompleteHandler, undoHabitCompletionHandler } from "../handlers/habit.handler";
+import { getHabitHistoryHandler } from "../handlers/habitHistory.handler";
 import {
   validateRegistration,
   registerMiddleware,
@@ -25,6 +26,7 @@ router.post("/api/v1/register", registerLimiter, validateRegistration, registerM
 router.post("/api/v1/login", loginLimiter, validateLogin, loginMiddleware, loginHandler);
 
 // Habit Routes (Protected)
+router.get("/api/v1/habits/history", authenticateToken, getHabitHistoryHandler);
 router.post("/api/v1/habits", authenticateToken, validateHabit, habitMiddleware, createHabitHandler);
 router.post(
   "/api/v1/habits/:habitId/complete",
