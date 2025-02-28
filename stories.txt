@@ -6,25 +6,8 @@ Basic Habit Logging
 [DONE] - As a user, I want to tap on a habit to mark it as completed so that I can easily track my daily progress.
 
 Undo Habit Logging
-[] - As a user, I want to undo a habit entry in case I mark it by mistake so that my habit streak remains accurate.
+[DONE] - As a user, I want to undo a habit entry in case I mark it by mistake so that my habit streak remains accurate.
 
 Partial Completion
-As a user, I want to log partial progress for a habit (e.g., drank 1 out of 2 liters of water) so that I can track my progress throughout the day.
+[DONE] - As a user, I want to log partial progress for a habit (e.g., drank 1 out of 2 liters of water) so that I can track my progress throughout the day.
 
-Daily Habit Summary
-As a user, I want to see a summary of my daily completed and pending habits so that I can stay on track.
-
-Streak Tracking
-As a user, I want to see streaks for my habits so that I feel motivated to maintain consistency.
-
-Habit Skipping with Reason
-As a user, I want to skip a habit for a valid reason (e.g., sick day) without breaking my streak so that my progress feels fair.
-
-Quick Add for New Habits
-As a user, I want to quickly add a new habit to my daily list so that I can start tracking it immediately.
-
-Multiple Completion Per Day
-As a user, I want to mark a habit as completed multiple times a day (e.g., drinking water 8 times) so that I can track repetitive habits.
-
-Offline Habit Logging - [FRONT-END]
-As a user, I want to log my habits even when I am offline so that my progress is updated when I reconnect to the internet.

@@ -416,14 +416,19 @@ const updateStreak = async (habitId: number, userID: string, streak: number): Pr
 
   try {
     connection = await pool.getConnection();
+    await connection.beginTransaction();
     logger.info("Database connection acquired for updating streak", { habitId, userID, streak });
 
     const updateQuery = "UPDATE habits SET streak = ? WHERE id = ? AND user_id = ?";
     const updateValues = [streak, habitId, userID];
 
     await connection.execute(updateQuery, updateValues);
+
+    await connection.commit();
+
     logger.info("Streak updated successfully", { habitId, userID, streak });
   } catch (err: unknown) {
+    await connection.rollback();
     const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
     logger.error("Error updating streak", { error: errorMessage, habitId, userID, streak });
     throw new Error(errorMessage);
