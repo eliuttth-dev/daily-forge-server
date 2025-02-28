@@ -7,4 +7,3 @@ SUB-TASKS:
 [DONE] - Undo Endpoint for Habit Entry – Allow users to quickly undo a habit entry.
 [DONE] - Habit History Log – Maintain a log of all habit completions with timestamps, enabling users to revert changes.
 [DONE] - Streak Recalculation – Ensure that streaks are dynamically updated when a habit entry is undone.
-[] - Analytics & Logs for Admins – Store habit undo actions in the backend for audit purposes and debugging.
